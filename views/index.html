@@ -1,23 +1,197 @@
+<style>
+	/* IMPORTANT - must give map div height */
+	#map-canvas { height:500px;}
+</style>
+
 <div class="row">
 
 	<div id="map-canvas" class="span6"></div>
+	
+	<!-- right column -->
+	<div class="span6">
+
+		<!-- Display entry form -->
+		<div class="row">
+			<div class="span6">
+					
+				<form class="form-horizontal">
+					<fieldset>
+
+					<!-- Form Name -->
+					<legend>Add Your Place</legend>
+
+					<!-- Text input-->
+					<div class="control-group">
+					  <label class="control-label">Your name</label>
+					  <div class="controls">
+					    <input id="place_name" name="name" type="text" placeholder="" class="input-xlarge" required="">
+					    
+					  </div>
+					</div>
+
+					<!-- Text input-->
+					<div class="control-group">
+					  <label class="control-label">Location</label>
+					  <div class="controls">
+					    <input id="location" name="location" type="text" placeholder="Enter a city, state or zipcode" class="input-xlarge" required="">
+					    <p class="help-block">This field will be geocoded with Google Maps API</p>
+					  </div>
+					</div>
+
+					<!-- Button -->
+					<div class="control-group">
+					  <label class="control-label"></label>
+					  <div class="controls">
+					    <input type="submit" id="locationBtn" name="locationBtn" class="btn btn-primary" value="Add Location">
+					  </div>
+					</div>
+
+					</fieldset>
+				</form>
+
+
+
+			</div>
+		</div>
+
+
+		<!-- Display place listing  -->
+		<div class="row">
+			<div class="span6">
+				
+			</div>
+		</div>
+
+
+	</div>
 
 </div>
 
+
+
 <script type="text/javascript"
-  src="https://maps.googleapis.com/maps/api/js?key={{google_map_key}}&sensor=FALSE">
+  src="//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyBcwy-Vt6p6Kl8ubXOkGixnyLj2jYaIvWA">
 </script>
 <script type="text/javascript">
+  var geocoder;
+  var map;
+  var places;
+  
   function initialize() {
+
+  	// create the geocoder
+  	geocoder = new google.maps.Geocoder();
+    
     var mapOptions = {
-      center: new google.maps.LatLng(-34.397, 150.644),
-      zoom: 8,
+      center: new google.maps.LatLng(40.74649,-74.0094),
+      zoom: 7,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    var map = new google.maps.Map(document.getElementById("map-canvas"),
-        mapOptions);
+    
+    // create the map
+    map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+    // fetch the existing places and put them on the map
+    fetchPlaces();
   }
 
-  
+
   google.maps.event.addDomListener(window, 'load', initialize);
+
+
+  // add location button event
+  jQuery("form").submit(function(e){
+
+  	// the name form field value
+  	var name = jQuery("#place_name").val();
+  	
+  	// get the location text field value
+  	var loc = jQuery("#location").val();
+  	console.log("location = " + loc);
+  	geocoder.geocode( { 'address': loc }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        map.setCenter(results[0].geometry.location);
+        
+        // put marker on map
+        var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location
+        });
+        console.log(results[0]);
+        var lat = results[0].geometry.location.lat();
+        var lng = results[0].geometry.location.lng();
+        var loc_name = results[0].formatted_address;
+
+        // send first location from results to server as new location
+        jQuery.ajax({
+        	url : '/add_place',
+        	dataType : 'json',
+        	type : 'POST',
+        	data : {
+        		name : name,
+        		latlng : lat + "," + lng,
+        		geo_name : loc_name
+        	},
+        	success : function(response){
+
+        		console.log(response);
+
+        	},
+        	error : function(err){
+
+        		// do error checking
+        		alert("something went wrong");
+        		console.error(err);
+        	}
+        });
+
+
+      } else {
+        alert("Try again. Geocode was not successful for the following reason: " + status);
+      }
+  	});
+	
+
+    e.preventDefault();
+    return false;
+
+  });
+
+
+	// fetch Places JSON from /data/places
+	// loop through and populate the map with markers
+	var fetchPlaces = function() {
+
+		jQuery.ajax({
+			url : '/data/places',
+			dataType : 'json',
+			success : function(response) {
+				
+				if (response.status == 'OK') {
+
+					places = response.places;
+
+					// loop through places and add markers
+					for (p in places) {
+
+						//create gmap latlng obj
+						tmpLatLng = new google.maps.LatLng( places[p].geo[0], places[p].geo[1]);
+
+						// make and place map maker.
+						var marker = new google.maps.Marker({
+						    map: map,
+						    position: tmpLatLng,
+						    title : places[p].name + "<br>" + places[p].geo_name
+						});
+
+					}
+
+				}
+			}
+		})
+
+
+	}
+
+  
 </script>

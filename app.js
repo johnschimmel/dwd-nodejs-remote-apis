@@ -61,7 +61,8 @@ COOKIEHASH in your .env file (also share with heroku)
 var routes = require('./routes/index.js');
 
 app.get('/', routes.index);
-
+app.get('/data/places', routes.get_places);
+app.post('/add_place',routes.post_add_place);
 
 // create NodeJS HTTP server using 'app'
 http.createServer(app).listen(app.get('port'), function(){
