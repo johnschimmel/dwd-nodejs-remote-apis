@@ -9,15 +9,21 @@ var request = require('request'); // library to make requests to remote urls
 var moment = require("moment"); // date manipulation library
 var placeModel = require("../models/place.js"); //db model
 
+// UPDATE WITH YOUR GOOGLE MAPS API KEY
+// https://developers.google.com/maps/documentation/javascript/tutorial#api_key
+var google_maps_key = "AIzaSyBcwy-Vt6p6Kl8ubXOkGixnyLj2jYaIvWA";
+
 /*
 	GET /
 */
 exports.index = function(req, res) {
 	
-	console.log("main page requested");
+	// render the map and form template
+	// pass in the google_maps_key, used in /views/index.html when requesting the Google Maps JS
 
 	templateData = {
-		pageTitle : 'All Places'
+		pageTitle : 'All Places',
+		google_maps_key : google_maps_key
 	};
 
 	res.render('index.html', templateData);

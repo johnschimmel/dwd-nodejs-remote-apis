@@ -1,10 +1,96 @@
-## Heroku ExpressJS Boilerplate
+## ITP DWD NodeJS Google Maps API & AJAX Demo
 
-Boilerplate for ExpressJS
+
+
+This demo application uses Google Maps and AJAX to accept user submitted data (name and location) and puts the location on the map and into the database.
+
+User Interaction Flow.
+
+1) User visits webpage
+2) User enters information into form
+3) User clicks 'Add Place', JavaScript takes the value of the location textbox and geocodes it with Google Maps API Geocoder
+4) If Geocoder is successful, JavaScript POSTs the name, "latitude,longitude" and place name to the web server /add_place. Also, adds Marker to map for new location.
+5) Web server accepts incoming POST and stores the data into MongoDB for future visitors.
+
+### Frontend / Client side JavaScript
+
+* [jQuery](http://www.jquery.com)
+* [Google Maps JavaScript API V3](https://developers.google.com/maps/documentation/javascript/tutorial)
+
+### Google Maps API
+
+#### Register for Maps API Key
+
+You will need a register for a Google Maps API Key. Very easy. Follow directions here, <https://developers.google.com/maps/documentation/javascript/tutorial#api_key>
+
+#### Add API Key to /routes/index.js
+
+With your API Key, open /routes/index.js and update the value of **google_maps_key**.
+
+	var google_maps_key = "YOUR-KEY-HERE";
+
+
+### Loading the Map
+
+There are a few pieces to get Google Maps to display on your web page.
+
+1) In your template file ceate an empty DIV element with an id. This div will be the container for the map.
+
+	<div id="map-canvas"></div>
+
+2) Add Map styles/css. For the demo, these are at the top of /views/index.html. Ideally, they would be inside your styles.css or main.css file.
+
+	<style>
+		/* IMPORTANT - must give map div height */
+		#map-canvas { height:400px; }
+
+		/* IMPORTANT - fixes webkit infoWindow rendering */
+		#map-canvas img { max-width: none; }
+	</style>
+
+3) Add Google Maps JavaScript library and initialization functions. The demo puts this code at the bottom of the **/views/index.html** file, ideally, this code is put inside a separate .js file.
+
+
+	function initialize() {
+		// create the geocoder
+		geocoder = new google.maps.Geocoder();
+
+		var mapOptions = {
+		  center: new google.maps.LatLng(40.74649,-74.0094),
+		  zoom: 7,
+		  mapTypeId: google.maps.MapTypeId.ROADMAP
+		};
+
+		// create the map
+		map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+		// this is a custom function for the demo, uncomment when ready.
+		// fetch the existing places and put them on the map
+		// fetchPlaces();
+	}
+
+	// set page ready trigger
+	google.maps.event.addDomListener(window, 'load', initialize);
+
+4) The custom functions for this demo including 
+	
+* Get existing Places JSON via AJAX onload. **See fetchPlaces() in /views/index.html**.
+* Geocoding a location (getting the latitude, longitude).
+* Creating Marker and putting on Map.
+* POSTing form via AJAX with jQuery.
+
+## Final Template
+
+See CSS, HTML and JS for the demo <https://gist.github.com/johnschimmel/5319511>
+
+
+
+### NodeJS stuff
 
 * Routes directory
 * Hogan-Express template engine (w/ layouts)
-* MongoDB (coming soon)
+* MongooseJS (for MongoDB)
+
 
 
 ### Getting started w/ local development server
