@@ -1,6 +1,12 @@
 <style>
 	/* IMPORTANT - must give map div height */
-	#map-canvas { height:500px;}
+	#map-canvas { 
+		height:400px;
+	}
+
+	#map-canvas img {
+		max-width: none;
+	}
 </style>
 
 <div class="row">
@@ -76,7 +82,8 @@
   var geocoder;
   var map;
   var places;
-  
+  var markers = [];
+
   function initialize() {
 
   	// create the geocoder
@@ -162,6 +169,10 @@
 	// loop through and populate the map with markers
 	var fetchPlaces = function() {
 
+		var infowindow =  new google.maps.InfoWindow({
+		    content: ''
+		});
+
 		jQuery.ajax({
 			url : '/data/places',
 			dataType : 'json',
@@ -184,6 +195,9 @@
 						    title : places[p].name + "<br>" + places[p].geo_name
 						});
 
+
+						bindInfoWindow(marker, map, infowindow, places[p].name + "<br>" + places[p].geo_name);
+
 					}
 
 				}
@@ -191,7 +205,15 @@
 		})
 
 
-	}
+	};
+
+
+	var bindInfoWindow = function(marker, map, infowindow, html) {
+	    google.maps.event.addListener(marker, 'click', function() {
+	        infowindow.setContent(html);
+	        infowindow.open(map, marker);
+	    });
+	} 
 
   
 </script>
