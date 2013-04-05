@@ -49,8 +49,16 @@ exports.get_places = function(req, res) {
 			places : allPlaces
 		};
 
-		res.json(data)
-
+		// was JSONP requested does querystring have callback
+		// allow remote domains to request places json
+		if (req.query.callback != undefined) {
+			res.jsonp(data);
+	
+		// 
+		} else {
+			res.json(data);
+		}
+		
 	});
 
 };
